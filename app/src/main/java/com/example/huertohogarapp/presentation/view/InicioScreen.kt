@@ -1,6 +1,8 @@
 package com.example.huertohogarapp.presentation.view
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,7 +21,8 @@ import com.example.huertohogarapp.presentation.viewmodel.InicioViewModel
  */
 @Composable
 fun InicioScreen(
-    viewModel: InicioViewModel = viewModel()
+    viewModel: InicioViewModel = viewModel(),
+    onNavigateToRegistro: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
@@ -31,20 +34,39 @@ fun InicioScreen(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(24.dp)
         ) {
             Text(
-                text = "Inicio",
+                text = "HuertoHogar",
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Bienvenido a HuertoHogar",
-                style = MaterialTheme.typography.bodyLarge,
+                text = "Bienvenido a tu huerto en casa",
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            Spacer(modifier = Modifier.height(32.dp))
+            Button(
+                onClick = onNavigateToRegistro,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            ) {
+                Icon(Icons.Filled.PersonAdd, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    "Registrarse",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

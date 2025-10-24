@@ -11,6 +11,8 @@ sealed class Screen(val route: String, val title: String) {
     object Nosotros : Screen("nosotros", "Nosotros")
     object Contacto : Screen("contacto", "Contacto")
     object Blog : Screen("blog", "Blog")
+    object Registro : Screen("registro", "Registro")
+    object Carrito : Screen("carrito", "Carrito")
 }
 
 /**
