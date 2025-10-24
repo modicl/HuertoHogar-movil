@@ -1,9 +1,12 @@
 package com.example.huertohogarapp.data.model
 
+import kotlinx.serialization.Serializable
+
 /**
  * Modelo de datos para Producto
  * Basado en el proyecto React
  */
+@Serializable
 data class Producto(
     val id: Int,
     val nombre: String,
