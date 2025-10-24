@@ -84,5 +84,7 @@ private fun getIconForScreen(screen: Screen): ImageVector {
         is Screen.Nosotros -> Icons.Filled.Info
         is Screen.Contacto -> Icons.Filled.Email
         is Screen.Blog -> Icons.AutoMirrored.Filled.Article
+        // Add this else branch to handle all other cases
+        else -> throw IllegalArgumentException("No icon for screen $screen")
     }
 }
