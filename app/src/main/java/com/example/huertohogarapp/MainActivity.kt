@@ -18,6 +18,7 @@ import com.example.huertohogarapp.presentation.navigation.HuertoHogarNavGraph
 import com.example.huertohogarapp.presentation.navigation.Screen
 import com.example.huertohogarapp.ui.theme.HuertoHogarAppTheme
 import kotlinx.coroutines.launch
+import com.example.huertohogarapp.data.local.database.AppDatabase
 
 /**
  * MainActivity - Actividad principal de la aplicación HuertoHogar
@@ -42,6 +43,11 @@ fun HuertoHogarApp() {
     val context = LocalContext.current
     val dataStore = remember { EstadoDataStore(context) }
     val coroutineScope = rememberCoroutineScope()
+
+    // Inicializar Room database (para inspección con App Inspector)
+    val db = remember { AppDatabase.getDatabase(context) }
+    val usuarioDao = db.usuarioDao()
+    // Puedes usar usuarioDao para operaciones en la base de datos desde un ViewModel o repositorio
     
     // Restaurar última página visitada
     var startDestination by remember { mutableStateOf(Screen.Inicio.route) }

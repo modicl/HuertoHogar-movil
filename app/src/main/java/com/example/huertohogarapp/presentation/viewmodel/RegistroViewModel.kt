@@ -1,16 +1,25 @@
 package com.example.huertohogarapp.presentation.viewmodel
 
+import android.app.Application
+import android.content.Context
 import android.net.Uri
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.huertohogarapp.data.local.database.UsuarioEntity
+import com.example.huertohogarapp.data.repository.UsuarioRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.io.InputStream
 
 /**
  * ViewModel para la pantalla de Registro
  * Arquitectura MVVM - Capa de Presentación (ViewModel)
  */
-class RegistroViewModel : ViewModel() {
+class RegistroViewModel(
+    application: Application
+) : AndroidViewModel(application) {
 
     data class RegistroUiState(
         val nombre: String = "",
@@ -30,6 +39,8 @@ class RegistroViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegistroUiState())
     val uiState: StateFlow<RegistroUiState> = _uiState.asStateFlow()
+
+    private val usuarioRepository = UsuarioRepository(application.applicationContext)
 
     fun onNombreChange(nombre: String) {
         _uiState.value = _uiState.value.copy(
@@ -77,14 +88,29 @@ class RegistroViewModel : ViewModel() {
     fun onRegistrar() {
         if (validarFormulario()) {
             _uiState.value = _uiState.value.copy(cargando = true)
-            
-            // Simulación de registro
-            // Aquí se podría guardar en DataStore o enviar a un servidor
-            
-            _uiState.value = _uiState.value.copy(
-                cargando = false,
-                mostrarDialogoExito = true
-            )
+            viewModelScope.launch {
+                val context = getApplication<Application>().applicationContext
+                val state = _uiState.value
+                val imagenPerfilBytes = state.fotoPerfil?.let { uri ->
+                    try {
+                        val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
+                        inputStream?.readBytes()
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                val usuario = UsuarioEntity(
+                    nombre = state.nombre + " " + state.apellido,
+                    email = state.correo,
+                    password = "", // No hay campo password en el formulario, puedes agregarlo si lo necesitas
+                    imagenPerfil = imagenPerfilBytes
+                )
+                usuarioRepository.insertarUsuario(usuario)
+                _uiState.value = _uiState.value.copy(
+                    cargando = false,
+                    mostrarDialogoExito = true
+                )
+            }
         }
     }
 
