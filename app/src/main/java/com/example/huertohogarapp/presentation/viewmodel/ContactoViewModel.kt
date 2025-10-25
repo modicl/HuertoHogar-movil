@@ -124,6 +124,6 @@ data class ContactoUiState(
     val telefonoError: String? = null,
     val formError: String? = null,
     val mensajeExito: String? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
     val isSent: Boolean = false
 )
