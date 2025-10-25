@@ -107,11 +107,6 @@ La aplicación ofrece una experiencia de compra fluida y moderna, con navegació
 - **Gradle** 8.9 - Sistema de compilación
 - **Git** - Control de versiones
 
-### Testing
-- **JUnit** - Testing unitario
-- **Espresso** - Testing de UI
-- **Compose UI Test** - Testing de Composables
-
 ---
 
 ## 🏗️ Arquitectura
