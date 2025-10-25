@@ -78,13 +78,12 @@ fun HuertoHogarBottomNavigation(
  * Obtiene el icono apropiado para cada pantalla
  */
 private fun getIconForScreen(screen: Screen): ImageVector {
-    return when (screen) {
-        is Screen.Inicio -> Icons.Filled.Home
-        is Screen.Productos -> Icons.Filled.ShoppingCart
-        is Screen.Nosotros -> Icons.Filled.Info
-        is Screen.Contacto -> Icons.Filled.Email
-        is Screen.Blog -> Icons.AutoMirrored.Filled.Article
-        // Add this else branch to handle all other cases
-        else -> throw IllegalArgumentException("No icon for screen $screen")
+    return when (screen.route) {
+        Screen.Inicio.route -> Icons.Filled.Home
+        Screen.Productos.route -> Icons.Filled.ShoppingCart
+        Screen.Nosotros.route -> Icons.Filled.Info
+        Screen.Contacto.route -> Icons.Filled.Email
+        Screen.Blog.route -> Icons.AutoMirrored.Filled.Article
+        else -> Icons.Filled.Home // Default fallback
     }
 }
