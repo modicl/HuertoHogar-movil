@@ -145,6 +145,9 @@ fun HuertoHogarNavGraph(
                     navController.navigate(Screen.Inicio.route) {
                         popUpTo(Screen.Inicio.route) { inclusive = true }
                     }
+                },
+                onNavigateBack = {
+                    navController.popBackStack()
                 }
             )
         }
