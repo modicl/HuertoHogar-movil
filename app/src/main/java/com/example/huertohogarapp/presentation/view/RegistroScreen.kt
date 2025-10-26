@@ -39,7 +39,8 @@ import java.io.File
 @Composable
 fun RegistroScreen(
     viewModel: RegistroViewModel = viewModel(),
-    onRegistroExitoso: () -> Unit = {}
+    onRegistroExitoso: () -> Unit = {},
+    onNavigateBack: () -> Unit = {}  // Nuevo parámetro para navegación
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -168,9 +169,19 @@ fun RegistroScreen(
                         fontWeight = FontWeight.Bold
                     )
                 },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.Filled.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
