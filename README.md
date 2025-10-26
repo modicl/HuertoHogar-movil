@@ -14,6 +14,12 @@
 </div>
 
 ---
+## Alumnos
+
+- Cristofer Faundez
+- Joaquin Reyes
+- Luciano Riveros
+- Felipe Villarroel
 
 ## 📖 Descripción
 
