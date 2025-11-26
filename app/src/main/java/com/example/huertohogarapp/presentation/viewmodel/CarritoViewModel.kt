@@ -30,7 +30,7 @@ class CarritoViewModel(application: Application) : AndroidViewModel(application)
     private fun observarCarrito() {
         viewModelScope.launch {
             carritoItems.collect { items ->
-                val total = items.sumOf { it.producto.precio * it.cantidad }
+                val total = items.sumOf { it.producto.precioProducto * it.cantidad }
                 val cantidadTotal = items.sumOf { it.cantidad }
                 _uiState.value = _uiState.value.copy(
                     total = total,
@@ -42,7 +42,7 @@ class CarritoViewModel(application: Application) : AndroidViewModel(application)
     
     fun agregarProducto(productoId: Int) {
         viewModelScope.launch {
-            val item = carritoItems.value.find { it.producto.id == productoId }
+            val item = carritoItems.value.find { it.producto.idProducto == productoId }
             item?.let {
                 carritoRepository.agregarProducto(it.producto)
             }

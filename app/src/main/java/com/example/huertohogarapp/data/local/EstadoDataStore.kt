@@ -5,10 +5,10 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.huertohogarapp.data.model.CartItem
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
 class EstadoDataStore(private val context: Context) {
     companion object {
@@ -16,6 +16,8 @@ class EstadoDataStore(private val context: Context) {
         private val ULTIMA_PAGINA = stringPreferencesKey("ultima_pagina")
         private val CARRITO_ITEMS = stringPreferencesKey("carrito_items")
     }
+
+    private val gson = Gson()
 
     // Guardar la última página visitada
     suspend fun guardarUltimaPagina(ruta: String) {
@@ -32,7 +34,7 @@ class EstadoDataStore(private val context: Context) {
     // Guardar items del carrito
     suspend fun guardarCarrito(items: List<CartItem>) {
         context.dataStore.edit { preferences ->
-            preferences[CARRITO_ITEMS] = Json.encodeToString(items)
+            preferences[CARRITO_ITEMS] = gson.toJson(items)
         }
     }
 
@@ -40,7 +42,8 @@ class EstadoDataStore(private val context: Context) {
     val carritoItems: Flow<List<CartItem>> = context.dataStore.data.map { preferences ->
         try {
             val jsonString = preferences[CARRITO_ITEMS] ?: "[]"
-            Json.decodeFromString<List<CartItem>>(jsonString)
+            val type = object : TypeToken<List<CartItem>>() {}.type
+            gson.fromJson<List<CartItem>>(jsonString, type) ?: emptyList()
         } catch (e: Exception) {
             emptyList()
         }

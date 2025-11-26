@@ -8,6 +8,9 @@ package com.example.huertohogarapp.presentation.navigation
 sealed class Screen(val route: String, val title: String) {
     object Inicio : Screen("inicio", "Inicio")
     object Productos : Screen("productos", "Productos")
+    object ProductoDetalle : Screen("producto/{productoId}", "Detalle del Producto") {
+        fun createRoute(productoId: Int) = "producto/$productoId"
+    }
     object Nosotros : Screen("nosotros", "Nosotros")
     object Contacto : Screen("contacto", "Contacto")
     object Blog : Screen("blog", "Blog")
