@@ -16,7 +16,7 @@ class CarritoRepository(private val dataStore: EstadoDataStore) {
     
     suspend fun agregarProducto(producto: Producto) {
         val currentItems = dataStore.carritoItems.first().toMutableList()
-        val existingItem = currentItems.find { it.producto.id == producto.id }
+        val existingItem = currentItems.find { it.producto.idProducto == producto.idProducto }
         
         if (existingItem != null) {
             // Si ya existe, incrementar cantidad
@@ -32,7 +32,7 @@ class CarritoRepository(private val dataStore: EstadoDataStore) {
     
     suspend fun quitarProducto(productoId: Int) {
         val currentItems = dataStore.carritoItems.first().toMutableList()
-        val existingItem = currentItems.find { it.producto.id == productoId }
+        val existingItem = currentItems.find { it.producto.idProducto == productoId }
         
         if (existingItem != null) {
             if (existingItem.cantidad > 1) {
@@ -49,7 +49,7 @@ class CarritoRepository(private val dataStore: EstadoDataStore) {
     
     suspend fun eliminarProducto(productoId: Int) {
         val currentItems = dataStore.carritoItems.first().toMutableList()
-        currentItems.removeAll { it.producto.id == productoId }
+        currentItems.removeAll { it.producto.idProducto == productoId }
         dataStore.guardarCarrito(currentItems)
     }
     
@@ -59,7 +59,7 @@ class CarritoRepository(private val dataStore: EstadoDataStore) {
     
     suspend fun obtenerTotal(): Double {
         val items = dataStore.carritoItems.first()
-        return items.sumOf { it.producto.precio * it.cantidad }
+        return items.sumOf { it.producto.precioProducto * it.cantidad }
     }
     
     suspend fun obtenerCantidadTotal(): Int {

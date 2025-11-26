@@ -1,6 +1,7 @@
 package com.example.huertohogarapp.data.repository
 
 import com.example.huertohogarapp.data.model.Producto
+import com.example.huertohogarapp.data.remote.RetrofitClient
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -11,33 +12,48 @@ import kotlinx.coroutines.flow.flow
 interface ProductoRepository {
     fun getProductos(): Flow<List<Producto>>
     fun getProductoById(id: Int): Flow<Producto?>
-    fun getProductosDestacados(): Flow<List<Producto>>
     fun searchProductos(query: String): Flow<List<Producto>>
 }
 
 /**
  * Implementación del repositorio de productos
- * Por ahora con datos mock, en futuro se conectará a API/BD
+ * Consume la API de HuertoHogar
  */
 class ProductoRepositoryImpl : ProductoRepository {
     
+    private val apiService = RetrofitClient.productoApiService
+    
     override fun getProductos(): Flow<List<Producto>> = flow {
-        // TODO: Implementar llamada a API o base de datos
-        emit(emptyList())
+        try {
+            val productos = apiService.getProductos()
+            emit(productos)
+        } catch (e: Exception) {
+            // En caso de error, emitir lista vacía
+            emit(emptyList())
+        }
     }
     
     override fun getProductoById(id: Int): Flow<Producto?> = flow {
-        // TODO: Implementar obtención de producto específico
-        emit(null)
-    }
-    
-    override fun getProductosDestacados(): Flow<List<Producto>> = flow {
-        // TODO: Implementar obtención de productos destacados
-        emit(emptyList())
+        try {
+            val productos = apiService.getProductos()
+            val producto = productos.find { it.idProducto == id }
+            emit(producto)
+        } catch (e: Exception) {
+            emit(null)
+        }
     }
     
     override fun searchProductos(query: String): Flow<List<Producto>> = flow {
-        // TODO: Implementar búsqueda de productos
-        emit(emptyList())
+        try {
+            val productos = apiService.getProductos()
+            val productosFiltrados = productos.filter { 
+                it.nombreProducto.contains(query, ignoreCase = true) ||
+                it.descripcionProducto.contains(query, ignoreCase = true) ||
+                it.categoria.nombreCategoria.contains(query, ignoreCase = true)
+            }
+            emit(productosFiltrados)
+        } catch (e: Exception) {
+            emit(emptyList())
+        }
     }
 }

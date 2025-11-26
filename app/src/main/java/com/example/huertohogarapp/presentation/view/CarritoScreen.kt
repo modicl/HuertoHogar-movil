@@ -192,12 +192,12 @@ fun CarritoScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(carritoItems, key = { it.producto.id }) { item ->
+                    items(carritoItems, key = { it.producto.idProducto }) { item ->
                         CarritoItemCard(
                             item = item,
-                            onAgregar = { viewModel.agregarProducto(item.producto.id) },
-                            onQuitar = { viewModel.quitarProducto(item.producto.id) },
-                            onEliminar = { viewModel.eliminarProducto(item.producto.id) }
+                            onAgregar = { viewModel.agregarProducto(item.producto.idProducto) },
+                            onQuitar = { viewModel.quitarProducto(item.producto.idProducto) },
+                            onEliminar = { viewModel.eliminarProducto(item.producto.idProducto) }
                         )
                     }
                 }
@@ -327,14 +327,14 @@ fun CarritoItemCard(
             ) {
                 Column {
                     Text(
-                        text = item.producto.nombre,
+                        text = item.producto.nombreProducto,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "$${String.format("%,.0f", item.producto.precio)} c/u",
+                        text = "$${String.format("%,.0f", item.producto.precioProducto)} c/u",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -406,7 +406,7 @@ fun CarritoItemCard(
                 }
 
                 Text(
-                    text = "$${String.format("%,.0f", item.producto.precio * item.cantidad)}",
+                    text = "$${String.format("%,.0f", item.producto.precioProducto * item.cantidad)}",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

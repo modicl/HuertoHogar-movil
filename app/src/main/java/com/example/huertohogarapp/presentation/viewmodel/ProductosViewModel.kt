@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.huertohogarapp.data.local.EstadoDataStore
 import com.example.huertohogarapp.data.model.Producto
 import com.example.huertohogarapp.data.repository.CarritoRepository
+import com.example.huertohogarapp.data.repository.ProductoRepositoryImpl
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -16,90 +17,7 @@ import kotlinx.coroutines.launch
 class ProductosViewModel(application: Application) : AndroidViewModel(application) {
     
     private val carritoRepository = CarritoRepository(EstadoDataStore(application))
-    
-    // Lista de 8 productos de HuertoHogar
-    private val todosLosProductos = listOf(
-        Producto(
-            id = 1,
-            nombre = "Kit de Inicio",
-            descripcion = "Kit completo para comenzar tu huerto en casa",
-            precio = 29990.0,
-            imagen = "kit_inicio",
-            categoria = "Kits",
-            stock = 15,
-            destacado = true
-        ),
-        Producto(
-            id = 2,
-            nombre = "Semillas de Tomate",
-            descripcion = "Semillas orgánicas de tomate cherry",
-            precio = 3990.0,
-            imagen = "semillas_tomate",
-            categoria = "Semillas",
-            stock = 50,
-            destacado = true
-        ),
-        Producto(
-            id = 3,
-            nombre = "Tierra Orgánica",
-            descripcion = "Sustrato orgánico premium 5kg",
-            precio = 8990.0,
-            imagen = "tierra",
-            categoria = "Sustratos",
-            stock = 30,
-            destacado = false
-        ),
-        Producto(
-            id = 4,
-            nombre = "Macetas Biodegradables",
-            descripcion = "Set de 10 macetas biodegradables",
-            precio = 5990.0,
-            imagen = "macetas",
-            categoria = "Macetas",
-            stock = 25,
-            destacado = false
-        ),
-        Producto(
-            id = 5,
-            nombre = "Fertilizante Natural",
-            descripcion = "Abono orgánico para todo tipo de plantas",
-            precio = 6990.0,
-            imagen = "fertilizante",
-            categoria = "Fertilizantes",
-            stock = 40,
-            destacado = true
-        ),
-        Producto(
-            id = 6,
-            nombre = "Semillas de Lechuga",
-            descripcion = "Semillas orgánicas de lechuga variada",
-            precio = 2990.0,
-            imagen = "semillas_lechuga",
-            categoria = "Semillas",
-            stock = 60,
-            destacado = false
-        ),
-        Producto(
-            id = 7,
-            nombre = "Kit de Herramientas",
-            descripcion = "Set básico de herramientas de jardinería",
-            precio = 15990.0,
-            imagen = "herramientas",
-            categoria = "Herramientas",
-            stock = 20,
-            destacado = false
-        ),
-        Producto(
-            id = 8,
-            nombre = "Sistema de Riego",
-            descripcion = "Sistema de riego por goteo automático",
-            precio = 24990.0,
-            imagen = "riego",
-            categoria = "Riego",
-            stock = 12,
-            destacado = true
-        )
-    )
+    private val productoRepository = ProductoRepositoryImpl()
     
     private val _uiState = MutableStateFlow(ProductosUiState())
     val uiState: StateFlow<ProductosUiState> = _uiState.asStateFlow()
@@ -111,12 +29,22 @@ class ProductosViewModel(application: Application) : AndroidViewModel(applicatio
         cargarProductos()
     }
     
-    private fun cargarProductos() {
-        _uiState.value = _uiState.value.copy(
-            productos = todosLosProductos,
-            productosFiltrados = todosLosProductos,
-            isLoading = false
-        )
+    fun cargarProductos() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, error = null)
+            
+            productoRepository.getProductos().collect { productos ->
+                _uiState.value = _uiState.value.copy(
+                    productos = productos,
+                    productosFiltrados = productos,
+                    isLoading = false
+                )
+            }
+        }
+    }
+    
+    fun getProductoById(id: Int): Flow<Producto?> {
+        return productoRepository.getProductoById(id)
     }
     
     fun filtrarPorCategoria(categoria: String) {
@@ -138,15 +66,15 @@ class ProductosViewModel(application: Application) : AndroidViewModel(applicatio
         // Filtrar por categoría
         if (state.categoriaSeleccionada != "Todos") {
             productosFiltrados = productosFiltrados.filter {
-                it.categoria == state.categoriaSeleccionada
+                it.categoria.nombreCategoria == state.categoriaSeleccionada
             }
         }
         
         // Filtrar por búsqueda
         if (state.searchQuery.isNotBlank()) {
             productosFiltrados = productosFiltrados.filter {
-                it.nombre.contains(state.searchQuery, ignoreCase = true) ||
-                it.descripcion.contains(state.searchQuery, ignoreCase = true)
+                it.nombreProducto.contains(state.searchQuery, ignoreCase = true) ||
+                it.descripcionProducto.contains(state.searchQuery, ignoreCase = true)
             }
         }
         
@@ -157,7 +85,7 @@ class ProductosViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             carritoRepository.agregarProducto(producto)
             _uiState.value = _uiState.value.copy(
-                mensajeSnackbar = "${producto.nombre} agregado al carrito"
+                mensajeSnackbar = "${producto.nombreProducto} agregado al carrito"
             )
         }
     }
@@ -173,11 +101,11 @@ class ProductosViewModel(application: Application) : AndroidViewModel(applicatio
     }
     
     fun obtenerCantidadEnCarrito(productoId: Int): Int {
-        return carritoItems.value.find { it.producto.id == productoId }?.cantidad ?: 0
+        return carritoItems.value.find { it.producto.idProducto == productoId }?.cantidad ?: 0
     }
     
     fun obtenerCategorias(): List<String> {
-        return listOf("Todos") + todosLosProductos.map { it.categoria }.distinct().sorted()
+        return listOf("Todos") + _uiState.value.productos.map { it.categoria.nombreCategoria }.distinct().sorted()
     }
 }
 
@@ -193,4 +121,3 @@ data class ProductosUiState(
     val categoriaSeleccionada: String = "Todos",
     val mensajeSnackbar: String? = null
 )
-

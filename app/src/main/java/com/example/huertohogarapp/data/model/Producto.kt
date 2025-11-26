@@ -1,19 +1,33 @@
 package com.example.huertohogarapp.data.model
 
-import kotlinx.serialization.Serializable
+import com.google.gson.annotations.SerializedName
 
 /**
  * Modelo de datos para Producto
- * Basado en el proyecto React
+ * Basado en la respuesta de la API
  */
-@Serializable
 data class Producto(
-    val id: Int,
-    val nombre: String,
-    val descripcion: String,
-    val precio: Double,
-    val imagen: String,
-    val categoria: String,
-    val stock: Int,
-    val destacado: Boolean = false
+    @SerializedName("idProducto")
+    val idProducto: Int,
+    
+    @SerializedName("nombreProducto")
+    val nombreProducto: String,
+    
+    @SerializedName("categoria")
+    val categoria: Categoria,
+    
+    @SerializedName("descripcionProducto")
+    val descripcionProducto: String,
+    
+    @SerializedName("precioProducto")
+    val precioProducto: Double,
+    
+    @SerializedName("stockProducto")
+    val stockProducto: Int,
+    
+    @SerializedName("paisOrigen")
+    val paisOrigen: PaisOrigen,
+    
+    @SerializedName("imagenUrl")
+    val imagenUrl: String
 )

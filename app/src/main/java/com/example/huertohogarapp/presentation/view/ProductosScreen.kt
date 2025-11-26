@@ -38,7 +38,8 @@ import com.example.huertohogarapp.presentation.viewmodel.ProductosViewModel
 @Composable
 fun ProductosScreen(
     viewModel: ProductosViewModel = viewModel(),
-    onNavigateToCarrito: () -> Unit = {}
+    onNavigateToCarrito: () -> Unit = {},
+    onNavigateToDetalle: (Int) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val carritoItems by viewModel.carritoItems.collectAsState()
@@ -179,9 +180,10 @@ fun ProductosScreen(
                     items(uiState.productosFiltrados) { producto ->
                         ProductoCard(
                             producto = producto,
-                            cantidadEnCarrito = viewModel.obtenerCantidadEnCarrito(producto.id),
+                            cantidadEnCarrito = viewModel.obtenerCantidadEnCarrito(producto.idProducto),
                             onAgregarAlCarrito = { viewModel.agregarAlCarrito(producto) },
-                            onQuitarDelCarrito = { viewModel.quitarDelCarrito(producto.id) }
+                            onQuitarDelCarrito = { viewModel.quitarDelCarrito(producto.idProducto) },
+                            onClick = { onNavigateToDetalle(producto.idProducto) }
                         )
                     }
                 }
@@ -195,33 +197,32 @@ fun ProductoCard(
     producto: Producto,
     cantidadEnCarrito: Int,
     onAgregarAlCarrito: () -> Unit,
-    onQuitarDelCarrito: () -> Unit
+    onQuitarDelCarrito: () -> Unit,
+    onClick: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(280.dp),
         shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Imagen del producto (placeholder)
-            Box(
+            // Imagen del producto
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(producto.imagenUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = producto.nombreProducto,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Filled.Grass,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+                    .height(120.dp),
+                contentScale = ContentScale.Crop
+            )
 
             Column(
                 modifier = Modifier
@@ -231,7 +232,7 @@ fun ProductoCard(
             ) {
                 Column {
                     Text(
-                        text = producto.nombre,
+                        text = producto.nombreProducto,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -239,7 +240,7 @@ fun ProductoCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = producto.descripcion,
+                        text = producto.descripcionProducto,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2,
@@ -247,7 +248,7 @@ fun ProductoCard(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "$${String.format("%,.0f", producto.precio)}",
+                        text = "$${String.format("%,.0f", producto.precioProducto)}",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

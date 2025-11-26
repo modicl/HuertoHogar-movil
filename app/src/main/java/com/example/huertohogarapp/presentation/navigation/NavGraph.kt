@@ -4,8 +4,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.huertohogarapp.presentation.view.*
 
 /**
@@ -61,6 +63,40 @@ fun HuertoHogarNavGraph(
             }
         ) {
             ProductosScreen(
+                onNavigateToCarrito = {
+                    navController.navigate(Screen.Carrito.route)
+                },
+                onNavigateToDetalle = { productoId ->
+                    navController.navigate(Screen.ProductoDetalle.createRoute(productoId))
+                }
+            )
+        }
+
+        // Pantalla de Detalle de Producto
+        composable(
+            route = Screen.ProductoDetalle.route,
+            arguments = listOf(
+                navArgument("productoId") { type = NavType.IntType }
+            ),
+            enterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = tween(300)
+                ) + fadeIn(animationSpec = tween(300))
+            },
+            exitTransition = {
+                slideOutHorizontally(
+                    targetOffsetX = { fullWidth -> fullWidth },
+                    animationSpec = tween(300)
+                ) + fadeOut(animationSpec = tween(300))
+            }
+        ) { backStackEntry ->
+            val productoId = backStackEntry.arguments?.getInt("productoId") ?: 0
+            ProductoDetalleScreen(
+                productoId = productoId,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
                 onNavigateToCarrito = {
                     navController.navigate(Screen.Carrito.route)
                 }
