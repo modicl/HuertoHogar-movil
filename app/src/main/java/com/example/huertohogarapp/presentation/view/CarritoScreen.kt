@@ -12,12 +12,16 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.huertohogarapp.data.local.EstadoDataStore
 import com.example.huertohogarapp.data.model.CartItem
+import com.example.huertohogarapp.data.repository.CarritoRepository
 import com.example.huertohogarapp.presentation.viewmodel.CarritoViewModel
+import com.example.huertohogarapp.presentation.viewmodel.CarritoViewModelFactory
 
 /**
  * Pantalla de Carrito de Compras (View)
@@ -26,10 +30,14 @@ import com.example.huertohogarapp.presentation.viewmodel.CarritoViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CarritoScreen(
-    viewModel: CarritoViewModel = viewModel(),
     onNavigateBack: () -> Unit = {},
     onCompraExitosa: () -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val carritoRepository = CarritoRepository(EstadoDataStore(context))
+    val factory = CarritoViewModelFactory(carritoRepository)
+    val viewModel: CarritoViewModel = viewModel(factory = factory)
+
     val carritoItems by viewModel.carritoItems.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     var mostrarDialogoLimpiar by remember { mutableStateOf(false) }
