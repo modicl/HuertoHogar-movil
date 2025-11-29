@@ -1,9 +1,11 @@
 package com.example.huertohogarapp.data.repository
 
 import com.example.huertohogarapp.data.model.Producto
-import com.example.huertohogarapp.data.remote.RetrofitClient
+import com.example.huertohogarapp.data.remote.ProductoApiService
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Repositorio para manejar operaciones de Productos
@@ -19,41 +21,36 @@ interface ProductoRepository {
  * Implementación del repositorio de productos
  * Consume la API de HuertoHogar
  */
-class ProductoRepositoryImpl : ProductoRepository {
-    
-    private val apiService = RetrofitClient.productoApiService
-    
+class ProductoRepositoryImpl(
+    private val apiService: ProductoApiService
+) : ProductoRepository {
+
     override fun getProductos(): Flow<List<Producto>> = flow {
-        try {
-            val productos = apiService.getProductos()
-            emit(productos)
-        } catch (e: Exception) {
-            // En caso de error, emitir lista vacía
-            emit(emptyList())
-        }
+        emit(apiService.getProductos())
+    }.catch { e ->
+        if (e is CancellationException) throw e
+        emit(emptyList())
     }
-    
+
     override fun getProductoById(id: Int): Flow<Producto?> = flow {
-        try {
-            val productos = apiService.getProductos()
-            val producto = productos.find { it.idProducto == id }
-            emit(producto)
-        } catch (e: Exception) {
-            emit(null)
-        }
+        val productos = apiService.getProductos()
+        val producto = productos.find { it.idProducto == id }
+        emit(producto)
+    }.catch { e ->
+        if (e is CancellationException) throw e
+        emit(null)
     }
-    
+
     override fun searchProductos(query: String): Flow<List<Producto>> = flow {
-        try {
-            val productos = apiService.getProductos()
-            val productosFiltrados = productos.filter { 
-                it.nombreProducto.contains(query, ignoreCase = true) ||
-                it.descripcionProducto.contains(query, ignoreCase = true) ||
-                it.categoria.nombreCategoria.contains(query, ignoreCase = true)
-            }
-            emit(productosFiltrados)
-        } catch (e: Exception) {
-            emit(emptyList())
+        val productos = apiService.getProductos()
+        val productosFiltrados = productos.filter {
+            it.nombreProducto.contains(query, ignoreCase = true) ||
+            it.descripcionProducto.contains(query, ignoreCase = true) ||
+            it.categoria.nombreCategoria.contains(query, ignoreCase = true)
         }
+        emit(productosFiltrados)
+    }.catch { e ->
+        if (e is CancellationException) throw e
+        emit(emptyList())
     }
 }

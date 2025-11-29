@@ -1,6 +1,5 @@
 package com.example.huertohogarapp.presentation.viewmodel
 
-import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -27,7 +26,6 @@ class ContactoViewModelTest {
     @AfterEach
     fun tearDown() {
         Dispatchers.resetMain()
-        unmockkAll()
     }
 
     @Test
@@ -152,13 +150,13 @@ class ContactoViewModelTest {
     }
 
     @Test
-    fun `enviarFormulario con campos vacios muestra error de formulario`() = runTest {
+    fun `enviarFormulario con campos requeridos vacios muestra error`() = runTest {
         // When
         viewModel.enviarFormulario()
 
         // Then
         val uiState = viewModel.uiState.value
-        assertEquals("Por favor complete todos los campos requeridos", uiState.formError)
+        assertEquals("Por favor corrija los errores en el formulario", uiState.formError)
         assertFalse(uiState.isLoading)
     }
 

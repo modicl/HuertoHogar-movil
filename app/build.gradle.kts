@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
     id("kotlin-kapt")
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -46,6 +47,24 @@ android {
     }
 }
 
+
+
+koverReport {
+    defaults {
+        filters {
+            includes {
+                classes("com.example.huertohogarapp.presentation.viewmodel.*")
+                classes("com.example.huertohogarapp.data.repository.*")
+            }
+        }
+        verify {
+            rule {
+                minBound(80)
+            }
+        }
+    }
+}
+
 dependencies {
 
     implementation(libs.androidx.core.ktx)
@@ -76,6 +95,10 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // JUnit 5
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     
     // Coil para carga de imágenes
     implementation("io.coil-kt:coil-compose:2.5.0")

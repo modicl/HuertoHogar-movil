@@ -8,6 +8,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+// Función de extensión para validar email, independiente de Android
+private fun String.isValidEmail(): Boolean {
+    return this.isNotBlank() && Regex("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$").matches(this)
+}
+
+
 /**
  * ViewModel para la pantalla de Contacto
  * Arquitectura MVVM
@@ -29,8 +35,7 @@ class ContactoViewModel : ViewModel() {
             email = value,
             emailError = when {
                 value.isBlank() -> "El email es requerido"
-                !android.util.Patterns.EMAIL_ADDRESS.matcher(value).matches() -> 
-                    "El email no es válido"
+                !value.isValidEmail() -> "El email no es válido"
                 else -> null
             }
         )
@@ -54,37 +59,16 @@ class ContactoViewModel : ViewModel() {
     fun enviarFormulario() {
         val currentState = _uiState.value
         
-        // Validar campos requeridos
-        if (currentState.nombre.isBlank() || 
-            currentState.email.isBlank() || 
-            currentState.mensaje.isBlank()) {
-            _uiState.value = currentState.copy(
-                formError = "Por favor complete todos los campos requeridos"
-            )
-            return
-        }
+        // Re-validar todos los campos antes de enviar
+        onNombreChange(currentState.nombre)
+        onEmailChange(currentState.email)
+        onMensajeChange(currentState.mensaje)
+        onTelefonoChange(currentState.telefono)
         
-        // Validar formato de email
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(currentState.email).matches()) {
-            _uiState.value = currentState.copy(
-                emailError = "El email no es válido"
-            )
-            return
-        }
-        
-        // Validar longitud del mensaje
-        if (currentState.mensaje.length < 10) {
-            _uiState.value = currentState.copy(
-                mensajeError = "El mensaje debe tener al menos 10 caracteres"
-            )
-            return
-        }
-        
-        // Validar teléfono si se proporcionó
-        if (currentState.telefono.isNotBlank() && 
-            !currentState.telefono.matches(Regex("^[+]?[0-9]{8,12}$"))) {
-            _uiState.value = currentState.copy(
-                telefonoError = "El teléfono no es válido"
+        val newState = _uiState.value
+        if (newState.nombreError != null || newState.emailError != null || newState.mensajeError != null || newState.telefonoError != null) {
+             _uiState.value = currentState.copy(
+                formError = "Por favor corrija los errores en el formulario"
             )
             return
         }

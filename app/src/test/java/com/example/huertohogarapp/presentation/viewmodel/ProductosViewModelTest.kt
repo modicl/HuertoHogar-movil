@@ -1,11 +1,10 @@
 package com.example.huertohogarapp.presentation.viewmodel
 
-import android.app.Application
 import com.example.huertohogarapp.data.model.Categoria
 import com.example.huertohogarapp.data.model.PaisOrigen
 import com.example.huertohogarapp.data.model.Producto
 import com.example.huertohogarapp.data.repository.CarritoRepository
-import com.example.huertohogarapp.data.repository.ProductoRepositoryImpl
+import com.example.huertohogarapp.data.repository.ProductoRepository
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -23,7 +22,8 @@ import org.junit.jupiter.api.Test
 class ProductosViewModelTest {
 
     private lateinit var viewModel: ProductosViewModel
-    private val application: Application = mockk(relaxed = true)
+    private val productoRepository: ProductoRepository = mockk()
+    private val carritoRepository: CarritoRepository = mockk(relaxed = true)
     private val testDispatcher = StandardTestDispatcher()
 
     private val categoriaFrutas = Categoria(1, "Frutas", "Frutas frescas")
@@ -66,19 +66,8 @@ class ProductosViewModelTest {
     @BeforeEach
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        
-        // Mock del ApplicationContext
-        every { application.applicationContext } returns application
-        
-        // Mock de ProductoRepositoryImpl estático
-        mockkConstructor(ProductoRepositoryImpl::class)
-        every { anyConstructed<ProductoRepositoryImpl>().getProductos() } returns flowOf(productosIniciales)
-        
-        // Mock de CarritoRepository
-        mockkConstructor(CarritoRepository::class)
-        every { anyConstructed<CarritoRepository>().carritoItems } returns flowOf(emptyList())
-        
-        viewModel = ProductosViewModel(application)
+        coEvery { productoRepository.getProductos() } returns flowOf(productosIniciales)
+        viewModel = ProductosViewModel(productoRepository, carritoRepository)
         testDispatcher.scheduler.advanceUntilIdle()
     }
 
@@ -204,14 +193,14 @@ class ProductosViewModelTest {
     fun `agregarAlCarrito llama al repositorio y muestra mensaje`() = runTest {
         // Given
         val producto = productosIniciales.first()
-        coEvery { anyConstructed<CarritoRepository>().agregarProducto(any()) } just Runs
+        coEvery { carritoRepository.agregarProducto(any()) } just Runs
 
         // When
         viewModel.agregarAlCarrito(producto)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        coVerify { anyConstructed<CarritoRepository>().agregarProducto(producto) }
+        coVerify { carritoRepository.agregarProducto(producto) }
         val uiState = viewModel.uiState.value
         assertEquals("${producto.nombreProducto} agregado al carrito", uiState.mensajeSnackbar)
     }
@@ -219,14 +208,14 @@ class ProductosViewModelTest {
     @Test
     fun `quitarDelCarrito llama al repositorio correctamente`() = runTest {
         // Given
-        coEvery { anyConstructed<CarritoRepository>().quitarProducto(any()) } just Runs
+        coEvery { carritoRepository.quitarProducto(any()) } just Runs
 
         // When
         viewModel.quitarDelCarrito(1)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        coVerify { anyConstructed<CarritoRepository>().quitarProducto(1) }
+        coVerify { carritoRepository.quitarProducto(1) }
     }
 
     @Test
