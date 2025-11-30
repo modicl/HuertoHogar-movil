@@ -49,17 +49,15 @@ fun HuertoHogarBottomNavigation(
                 },
                 selected = isSelected,
                 onClick = {
-                    if (currentRoute != screen.route) {
-                        navController.navigate(screen.route) {
-                            // Pop up to the start destination to avoid building up a large stack
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            // Avoid multiple copies of the same destination
-                            launchSingleTop = true
-                            // Restore state when reselecting a previously selected item
-                            restoreState = true
+                    // Navegar siempre, incluso si parece que estamos en la misma ruta
+                    // Esto soluciona el problema del doble click
+                    navController.navigate(screen.route) {
+                        // Limpiar el back stack hasta Inicio
+                        popUpTo(Screen.Inicio.route) {
+                            inclusive = true
                         }
+                        // Evitar múltiples copias del mismo destino
+                        launchSingleTop = true
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
