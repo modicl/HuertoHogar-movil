@@ -50,20 +50,26 @@ fun HuertoHogarApp() {
     // Puedes usar usuarioDao para operaciones en la base de datos desde un ViewModel o repositorio
     
     // Restaurar última página visitada
-    var startDestination by remember { mutableStateOf(Screen.Inicio.route) }
     var isLoading by remember { mutableStateOf(true) }
     
     LaunchedEffect(Unit) {
         dataStore.ultimaPagina.collect { ultimaPagina ->
             if (isLoading) {
-                // Navegar a la última página solo en el primer inicio
-                startDestination = ultimaPagina
-                if (ultimaPagina != Screen.Inicio.route) {
+                isLoading = false
+                // Solo navegar si la última página NO es Inicio (que ya es el startDestination)
+                if (ultimaPagina != Screen.Inicio.route && ultimaPagina.isNotBlank()) {
+                    // Pequeño delay para asegurar que el NavController esté listo
+                    kotlinx.coroutines.delay(100)
                     navController.navigate(ultimaPagina) {
-                        popUpTo(Screen.Inicio.route) { inclusive = false }
+                        // Mantener Inicio en el stack para poder volver
+                        popUpTo(Screen.Inicio.route) { 
+                            inclusive = false 
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
                     }
                 }
-                isLoading = false
             }
         }
     }

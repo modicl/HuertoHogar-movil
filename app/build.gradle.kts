@@ -132,6 +132,10 @@ dependencies {
     // MockK
     testImplementation("io.mockk:mockk:1.13.8")
     
+    // MockK para androidTest
+    androidTestImplementation("io.mockk:mockk-android:1.13.8")
+    androidTestImplementation("io.mockk:mockk-agent:1.13.8")
+    
     // JUnit Jupiter
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
