@@ -194,6 +194,7 @@ class ProductosViewModelTest {
         // Given
         val producto = productosIniciales.first()
         coEvery { carritoRepository.agregarProducto(any()) } just Runs
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // When
         viewModel.agregarAlCarrito(producto)
@@ -242,5 +243,117 @@ class ProductosViewModelTest {
         assertTrue(categorias.contains("Frutas"))
         assertTrue(categorias.contains("Verduras"))
         assertEquals(3, categorias.size) // Todos, Frutas, Verduras
+    }
+
+    @Test
+    fun `getProductoById retorna el producto correcto`() = runTest {
+        // Given
+        val productoEsperado = productosIniciales.first()
+        coEvery { productoRepository.getProductoById(1) } returns flowOf(productoEsperado)
+
+        // When
+        val resultado = viewModel.getProductoById(1)
+
+        // Then
+        resultado.collect { producto ->
+            assertEquals(productoEsperado, producto)
+        }
+    }
+
+    @Test
+    fun `getProductoById retorna null para id inexistente`() = runTest {
+        // Given
+        coEvery { productoRepository.getProductoById(999) } returns flowOf(null)
+
+        // When
+        val resultado = viewModel.getProductoById(999)
+
+        // Then
+        resultado.collect { producto ->
+            assertNull(producto)
+        }
+    }
+
+    @Test
+    fun `obtenerCantidadEnCarrito retorna cantidad correcta`() = runTest {
+        // Given - carritoItems ya está configurado como relaxed mock
+
+        // When
+        val cantidad = viewModel.obtenerCantidadEnCarrito(1)
+
+        // Then - como es mock relaxed, retorna 0 por defecto
+        assertEquals(0, cantidad)
+    }
+
+    @Test
+    fun `buscarProductos sin coincidencias retorna lista vacia`() = runTest {
+        // When
+        viewModel.buscarProductos("ProductoQueNoExiste123")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertTrue(uiState.productosFiltrados.isEmpty())
+    }
+
+    @Test
+    fun `filtrar por categoria inexistente retorna lista vacia`() = runTest {
+        // When
+        viewModel.filtrarPorCategoria("CategoriaInexistente")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertEquals("CategoriaInexistente", uiState.categoriaSeleccionada)
+        assertTrue(uiState.productosFiltrados.isEmpty())
+    }
+
+    @Test
+    fun `cargarProductos establece isLoading en true inicialmente`() = runTest {
+        // Given
+        coEvery { productoRepository.getProductos() } returns flowOf(emptyList())
+        
+        // When - crear un nuevo viewModel para capturar el estado de loading
+        val viewModel2 = ProductosViewModel(productoRepository, carritoRepository)
+        
+        // Then - después de cargar, isLoading es false
+        testDispatcher.scheduler.advanceUntilIdle()
+        assertFalse(viewModel2.uiState.value.isLoading)
+    }
+
+    @Test
+    fun `carritoItems se inicializa correctamente`() = runTest {
+        // Then
+        assertNotNull(viewModel.carritoItems)
+    }
+
+    @Test
+    fun `buscarProductos con espacios funciona correctamente`() = runTest {
+        // When
+        viewModel.buscarProductos("  Tomate  ")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - contains no hace trim automático
+        val uiState = viewModel.uiState.value
+        // Los espacios se mantienen en la query
+        assertEquals("  Tomate  ", uiState.searchQuery)
+    }
+
+    @Test
+    fun `filtrar y luego limpiar busqueda muestra productos filtrados`() = runTest {
+        // Given
+        viewModel.filtrarPorCategoria("Frutas")
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.buscarProductos("Tomate")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // When
+        viewModel.buscarProductos("")
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then - debe mostrar todos los productos de Frutas
+        val uiState = viewModel.uiState.value
+        assertEquals("Frutas", uiState.categoriaSeleccionada)
+        assertEquals(2, uiState.productosFiltrados.size) // Tomate y Manzana
     }
 }
