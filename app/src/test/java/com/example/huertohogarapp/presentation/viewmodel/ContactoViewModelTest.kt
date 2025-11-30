@@ -296,4 +296,128 @@ class ContactoViewModelTest {
         assertEquals("", uiState.mensaje)
         assertEquals("", uiState.telefono)
     }
+
+    @Test
+    fun `onTelefonoChange con telefono vacio no muestra error`() {
+        // When
+        viewModel.onTelefonoChange("")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertNull(uiState.telefonoError)
+    }
+
+    @Test
+    fun `onTelefonoChange con telefono internacional valido`() {
+        // When
+        viewModel.onTelefonoChange("+56912345678")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertNull(uiState.telefonoError)
+    }
+
+    @Test
+    fun `onTelefonoChange con letras muestra error`() {
+        // When
+        viewModel.onTelefonoChange("123abc456")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertEquals("El teléfono no es válido", uiState.telefonoError)
+    }
+
+    @Test
+    fun `onEmailChange con email sin punto en dominio muestra error`() {
+        // When
+        viewModel.onEmailChange("test@examplecom")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertEquals("El email no es válido", uiState.emailError)
+    }
+
+    @Test
+    fun `onEmailChange con dominio muy corto muestra error`() {
+        // When
+        viewModel.onEmailChange("test@example.c")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertEquals("El email no es válido", uiState.emailError)
+    }
+
+    @Test
+    fun `onMensajeChange con exactamente 10 caracteres no muestra error`() {
+        // When
+        viewModel.onMensajeChange("1234567890")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertNull(uiState.mensajeError)
+    }
+
+    @Test
+    fun `onMensajeChange con 9 caracteres muestra error`() {
+        // When
+        viewModel.onMensajeChange("123456789")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertEquals("El mensaje debe tener al menos 10 caracteres", uiState.mensajeError)
+    }
+
+    @Test
+    fun `enviarFormulario con solo error en telefono muestra error de formulario`() = runTest {
+        // Given
+        viewModel.onNombreChange("Juan Pérez")
+        viewModel.onEmailChange("test@example.com")
+        viewModel.onMensajeChange("Este es un mensaje válido")
+        viewModel.onTelefonoChange("invalido")
+
+        // When
+        viewModel.enviarFormulario()
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertNotNull(uiState.telefonoError)
+    }
+
+    @Test
+    fun `enviarFormulario con solo error en mensaje muestra error de formulario`() = runTest {
+        // Given
+        viewModel.onNombreChange("Juan Pérez")
+        viewModel.onEmailChange("test@example.com")
+        viewModel.onMensajeChange("corto")
+        viewModel.onTelefonoChange("")
+
+        // When
+        viewModel.enviarFormulario()
+
+        // Then
+        val uiState = viewModel.uiState.value
+        assertNotNull(uiState.mensajeError)
+    }
+
+    @Test
+    fun `onNombreChange con espacios es valido`() {
+        // When
+        viewModel.onNombreChange("   ")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        // isBlank() retorna true para espacios en blanco
+        assertEquals("El nombre es requerido", uiState.nombreError)
+    }
+
+    @Test
+    fun `onEmailChange con espacios muestra error`() {
+        // When
+        viewModel.onEmailChange("   ")
+
+        // Then
+        val uiState = viewModel.uiState.value
+        // isBlank() retorna true para espacios en blanco
+        assertEquals("El email es requerido", uiState.emailError)
+    }
 }

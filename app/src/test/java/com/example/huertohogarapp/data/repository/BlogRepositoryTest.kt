@@ -62,4 +62,87 @@ class BlogRepositoryTest {
         // Then
         assertTrue(result.isEmpty())
     }
+
+    @Test
+    fun `getBlogPosts contiene posts con datos validos`() = runBlocking {
+        val posts = repository.getBlogPosts().first()
+        
+        posts.forEach { post ->
+            assertTrue(post.id > 0)
+            assertTrue(post.titulo.isNotBlank())
+            assertTrue(post.descripcion.isNotBlank())
+            assertTrue(post.autor.isNotBlank())
+        }
+    }
+
+    @Test
+    fun `getBlogPostById retorna cada post correctamente`() = runBlocking {
+        for (id in 1..4) {
+            val post = repository.getBlogPostById(id).first()
+            assertEquals(id, post?.id)
+        }
+    }
+
+    @Test
+    fun `getBlogPostsByCategory filtra por Sostenibilidad`() = runBlocking {
+        val posts = repository.getBlogPostsByCategory("Sostenibilidad").first()
+        assertTrue(posts.all { it.categoria == "Sostenibilidad" })
+    }
+
+    @Test
+    fun `getBlogPostsByCategory filtra por Consejos`() = runBlocking {
+        val posts = repository.getBlogPostsByCategory("Consejos").first()
+        assertTrue(posts.all { it.categoria == "Consejos" })
+    }
+
+    @Test
+    fun `getBlogPostsByCategory filtra por Tendencias`() = runBlocking {
+        val posts = repository.getBlogPostsByCategory("Tendencias").first()
+        assertTrue(posts.all { it.categoria == "Tendencias" })
+    }
+
+    @Test
+    fun `primer post tiene autor correcto`() = runBlocking {
+        val post = repository.getBlogPostById(1).first()
+        assertEquals("María González", post?.autor)
+    }
+
+    @Test
+    fun `segundo post tiene autor correcto`() = runBlocking {
+        val post = repository.getBlogPostById(2).first()
+        assertEquals("Carlos Ramírez", post?.autor)
+    }
+
+    @Test
+    fun `tercer post tiene autor correcto`() = runBlocking {
+        val post = repository.getBlogPostById(3).first()
+        assertEquals("Ana Martínez", post?.autor)
+    }
+
+    @Test
+    fun `cuarto post tiene autor correcto`() = runBlocking {
+        val post = repository.getBlogPostById(4).first()
+        assertEquals("Jorge López", post?.autor)
+    }
+
+    @Test
+    fun `todos los posts tienen URLs validas`() = runBlocking {
+        val posts = repository.getBlogPosts().first()
+        posts.forEach { post ->
+            assertTrue(post.url.startsWith("https://"))
+        }
+    }
+
+    @Test
+    fun `todos los posts tienen tiempo de lectura`() = runBlocking {
+        val posts = repository.getBlogPosts().first()
+        posts.forEach { post ->
+            assertTrue(post.tiempoLectura.contains("min"))
+        }
+    }
+
+    @Test
+    fun `repository implementa BlogRepository interface`() {
+        assertTrue(repository is BlogRepository)
+    }
 }

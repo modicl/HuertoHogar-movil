@@ -22,6 +22,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -45,16 +49,40 @@ android {
             it.useJUnitPlatform()
         }
     }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/LICENSE-notice.md"
+        }
+    }
 }
 
 
 
 koverReport {
-    defaults {
+    androidReports("debug") {
         filters {
             includes {
-                classes("com.example.huertohogarapp.presentation.viewmodel.*")
+                classes("com.example.huertohogarapp.data.model.*")
                 classes("com.example.huertohogarapp.data.repository.*")
+                classes("com.example.huertohogarapp.data.local.database.*")
+                classes("com.example.huertohogarapp.presentation.viewmodel.*")
+                classes("com.example.huertohogarapp.presentation.navigation.Screen*")
+                classes("com.example.huertohogarapp.ui.theme.*")
+            }
+            excludes {
+                classes("*\$Companion*")
+                classes("*\$special*")
+                classes("*\$\$serializer*")
+                classes("*Kt\$*")  // Lambdas generadas
+                classes("*RegistroViewModel")
+                classes("*UsuarioRepository")
+                classes("*NavGraphKt*")
+                classes("*ThemeKt*")
+                classes("*AppDatabase*")
+                classes("*UsuarioDao*")
+                classes("*Factory*")
             }
         }
         verify {
@@ -129,10 +157,10 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
     testImplementation("io.kotest:kotest-assertions-core:5.8.0")
 
-    // MockK
+    // MockK para unit tests
     testImplementation("io.mockk:mockk:1.13.8")
     
-    // MockK para androidTest
+    // MockK para instrumented tests (androidTest)
     androidTestImplementation("io.mockk:mockk-android:1.13.8")
     androidTestImplementation("io.mockk:mockk-agent:1.13.8")
     
@@ -143,12 +171,19 @@ dependencies {
     // AndroidX Test
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     
+    // Coroutines testing para unit tests
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.3")
+    
+    // Coroutines testing para androidTest
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
