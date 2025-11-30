@@ -129,4 +129,61 @@ class ProductoRepositoryTest {
         // Then
         assertTrue(result.isEmpty())
     }
+
+    @Test
+    fun `searchProductos busca por descripcion`() = runBlocking {
+        coEvery { apiService.getProductos() } returns productos
+        
+        val result = repository.searchProductos("rojo").first()
+        
+        assertEquals(1, result.size)
+        assertEquals("Tomate", result.first().nombreProducto)
+    }
+
+    @Test
+    fun `searchProductos busca por categoria`() = runBlocking {
+        coEvery { apiService.getProductos() } returns productos
+        
+        val result = repository.searchProductos("Frutas").first()
+        
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun `searchProductos es case insensitive`() = runBlocking {
+        coEvery { apiService.getProductos() } returns productos
+        
+        val resultLower = repository.searchProductos("tomate").first()
+        val resultUpper = repository.searchProductos("TOMATE").first()
+        
+        assertEquals(resultLower.size, resultUpper.size)
+    }
+
+    @Test
+    fun `getProductoById encuentra segundo producto`() = runBlocking {
+        coEvery { apiService.getProductos() } returns productos
+        
+        val result = repository.getProductoById(2).first()
+        
+        assertEquals("Manzana", result?.nombreProducto)
+        assertEquals(20.0, result?.precioProducto)
+    }
+
+    @Test
+    fun `getProductos retorna productos con datos completos`() = runBlocking {
+        coEvery { apiService.getProductos() } returns productos
+        
+        val result = repository.getProductos().first()
+        
+        result.forEach { producto ->
+            assertTrue(producto.idProducto > 0)
+            assertTrue(producto.nombreProducto.isNotBlank())
+            assertTrue(producto.precioProducto > 0)
+        }
+    }
+
+    @Test
+    fun `repository implementa ProductoRepository interface`() {
+        assertTrue(repository is ProductoRepository)
+    }
 }
