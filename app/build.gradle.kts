@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.10"
     id("kotlin-kapt")
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -39,6 +40,29 @@ android {
     buildFeatures {
         compose = true
     }
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
+}
+
+
+
+koverReport {
+    defaults {
+        filters {
+            includes {
+                classes("com.example.huertohogarapp.presentation.viewmodel.*")
+                classes("com.example.huertohogarapp.data.repository.*")
+            }
+        }
+        verify {
+            rule {
+                minBound(80)
+            }
+        }
+    }
 }
 
 dependencies {
@@ -71,6 +95,10 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+    // JUnit 5
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
     
     // Coil para carga de imágenes
     implementation("io.coil-kt:coil-compose:2.5.0")
@@ -97,11 +125,26 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.0")
     kapt("androidx.room:room-compiler:2.6.0")
     
+    // Kotest
+    testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
+    testImplementation("io.kotest:kotest-assertions-core:5.8.0")
+
+    // MockK
+    testImplementation("io.mockk:mockk:1.13.8")
+    
+    // JUnit Jupiter
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
+    // AndroidX Test
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.3")
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }

@@ -26,8 +26,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.huertohogarapp.R
+import com.example.huertohogarapp.data.local.EstadoDataStore
 import com.example.huertohogarapp.data.model.Producto
+import com.example.huertohogarapp.data.remote.RetrofitClient
+import com.example.huertohogarapp.data.repository.CarritoRepository
+import com.example.huertohogarapp.data.repository.ProductoRepositoryImpl
 import com.example.huertohogarapp.presentation.viewmodel.ProductosViewModel
+import com.example.huertohogarapp.presentation.viewmodel.ProductosViewModelFactory
 
 /**
  * Pantalla de Productos (View)
@@ -37,10 +42,15 @@ import com.example.huertohogarapp.presentation.viewmodel.ProductosViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductosScreen(
-    viewModel: ProductosViewModel = viewModel(),
     onNavigateToCarrito: () -> Unit = {},
     onNavigateToDetalle: (Int) -> Unit = {}
 ) {
+    val context = LocalContext.current
+    val carritoRepository = CarritoRepository(EstadoDataStore(context))
+    val productoRepository = ProductoRepositoryImpl(RetrofitClient.productoApiService)
+    val factory = ProductosViewModelFactory(productoRepository, carritoRepository)
+    val viewModel: ProductosViewModel = viewModel(factory = factory)
+    
     val uiState by viewModel.uiState.collectAsState()
     val carritoItems by viewModel.carritoItems.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
