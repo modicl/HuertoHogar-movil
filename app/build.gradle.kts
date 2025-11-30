@@ -129,8 +129,12 @@ dependencies {
     testImplementation("io.kotest:kotest-runner-junit5:5.8.0")
     testImplementation("io.kotest:kotest-assertions-core:5.8.0")
 
-    // MockK
+    // MockK para unit tests
     testImplementation("io.mockk:mockk:1.13.8")
+    
+    // MockK para instrumented tests (androidTest)
+    androidTestImplementation("io.mockk:mockk-android:1.13.8")
+    androidTestImplementation("io.mockk:mockk-agent:1.13.8")
     
     // JUnit Jupiter
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
@@ -145,6 +149,10 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.3")
+    
+    // Coroutines testing para androidTest
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
